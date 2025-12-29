@@ -7,8 +7,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
 });
 
+// Logout/clear existing token
+function logoutExistingToken() {
+    try {
+        // Method 1: Clear via Swagger UI API
+        if (window.ui && window.ui.authActions) {
+            window.ui.authActions.logout(['Bearer']);
+            console.log('🔓 Logged out existing token via Swagger UI API');
+        }
+
+        // Method 2: Clear via SwaggerUIBundle  
+        if (window.SwaggerUIBundle && window.SwaggerUIBundle.authActions) {
+            window.SwaggerUIBundle.authActions.logout(['Bearer']);
+            console.log('🔓 Logged out existing token via SwaggerUIBundle');
+        }
+
+        // Method 3: Clear localStorage (except our own storage)
+        const authKeys = Object.keys(localStorage).filter(key =>
+            (key.includes('authorized') ||
+                key.includes('auth') ||
+                key.includes('bearer') ||
+                key.includes('token')) &&
+            !key.includes('swagger_token_manager_auth')
+        );
+        authKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+
+    } catch (error) {
+        console.warn('Could not logout existing token:', error);
+    }
+}
+
 // Apply token to Swagger UI
 function applyTokenToSwagger(token, tokenName) {
+    try {
+        // First, logout existing token
+        logoutExistingToken();
+
+        // Small delay to ensure logout completes before applying new token
+        setTimeout(() => {
+            applyNewToken(token, tokenName);
+        }, 150);
+
+    } catch (error) {
+        console.error('Error in applyTokenToSwagger:', error);
+    }
+}
+
+// Apply new token after logout
+function applyNewToken(token, tokenName) {
     try {
         // Method 1: Try to find Swagger UI instance in window
         if (window.ui) {
@@ -26,8 +74,15 @@ function applyTokenToSwagger(token, tokenName) {
                 }
             });
 
-            console.log(`Token "${tokenName}" applied successfully via Swagger UI API`);
+            console.log(`✅ Token "${tokenName}" applied successfully via Swagger UI API`);
             showSuccessMessage(tokenName);
+
+            // Save to localStorage for persistence
+            localStorage.setItem('swagger_token_manager_auth', JSON.stringify({
+                token: token,
+                tokenName: tokenName,
+                appliedAt: new Date().toISOString()
+            }));
             return;
         }
 
@@ -41,19 +96,25 @@ function applyTokenToSwagger(token, tokenName) {
                     }
                 });
 
-                console.log(`Token "${tokenName}" applied successfully via SwaggerUIBundle`);
+                console.log(`✅ Token "${tokenName}" applied successfully via SwaggerUIBundle`);
                 showSuccessMessage(tokenName);
+
+                // Save to localStorage for persistence
+                localStorage.setItem('swagger_token_manager_auth', JSON.stringify({
+                    token: token,
+                    tokenName: tokenName,
+                    appliedAt: new Date().toISOString()
+                }));
                 return;
             }
         }
 
         // Method 3: Try to inject via localStorage for persistence
-        const authData = {
+        localStorage.setItem('swagger_token_manager_auth', JSON.stringify({
             token: token,
             tokenName: tokenName,
             appliedAt: new Date().toISOString()
-        };
-        localStorage.setItem('swagger_token_manager_auth', JSON.stringify(authData));
+        }));
 
         // Method 4: Try to click authorize button and fill in the token
         setTimeout(() => {
@@ -65,34 +126,41 @@ function applyTokenToSwagger(token, tokenName) {
                 authorizeBtn.click();
 
                 setTimeout(() => {
-                    // Find the input field for Bearer token
+                    // First, clear any existing token in the input
                     const tokenInput = document.querySelector('input[name="Bearer"]') ||
                         document.querySelector('input[type="text"][placeholder*="auth"]') ||
                         document.querySelector('.auth-container input[type="text"]');
 
                     if (tokenInput) {
-                        tokenInput.value = token;
+                        // Clear existing value first
+                        tokenInput.value = '';
                         tokenInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        tokenInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-                        // Click authorize button in modal
+                        // Then set new token
                         setTimeout(() => {
-                            const authModalBtn = document.querySelector('.auth-btn-wrapper .authorize') ||
-                                document.querySelector('button.btn.modal-btn.auth.authorize');
+                            tokenInput.value = token;
+                            tokenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            tokenInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-                            if (authModalBtn) {
-                                authModalBtn.click();
-                                console.log(`Token "${tokenName}" applied via UI interaction`);
-                                showSuccessMessage(tokenName);
+                            // Click authorize button in modal
+                            setTimeout(() => {
+                                const authModalBtn = document.querySelector('.auth-btn-wrapper .authorize') ||
+                                    document.querySelector('button.btn.modal-btn.auth.authorize');
 
-                                // Close modal
-                                setTimeout(() => {
-                                    const closeBtn = document.querySelector('.close-modal') ||
-                                        document.querySelector('button.btn.modal-btn.auth.btn-done');
-                                    if (closeBtn) closeBtn.click();
-                                }, 300);
-                            }
-                        }, 200);
+                                if (authModalBtn) {
+                                    authModalBtn.click();
+                                    console.log(`✅ Token "${tokenName}" applied via UI interaction`);
+                                    showSuccessMessage(tokenName);
+
+                                    // Close modal
+                                    setTimeout(() => {
+                                        const closeBtn = document.querySelector('.close-modal') ||
+                                            document.querySelector('button.btn.modal-btn.auth.btn-done');
+                                        if (closeBtn) closeBtn.click();
+                                    }, 300);
+                                }
+                            }, 200);
+                        }, 100);
                     }
                 }, 300);
             } else {
@@ -102,7 +170,7 @@ function applyTokenToSwagger(token, tokenName) {
         }, 100);
 
     } catch (error) {
-        console.error('Error applying token:', error);
+        console.error('Error applying new token:', error);
     }
 }
 
@@ -130,7 +198,7 @@ function showSuccessMessage(tokenName) {
       font-weight: 600;
       animation: slideInRight 0.3s ease-out;
     ">
-      Token "${tokenName}" đã được áp dụng!
+      ✅ Token "${tokenName}" đã được áp dụng!
     </div>
     <style>
       @keyframes slideInRight {
