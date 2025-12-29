@@ -37,6 +37,25 @@
         </form>
       </section>
 
+      <section class="param-lock-section">
+        <h2>🔒 Khóa Tham Số</h2>
+        <div class="param-lock-container">
+          <div class="param-lock-info">
+            <p class="param-lock-description">
+              Tự động lưu và khôi phục tham số khi reload trang
+            </p>
+            <p class="param-lock-status">
+              Trạng thái:
+              <span id="lockStatus" class="status-text">Đang tắt</span>
+            </p>
+          </div>
+          <button id="toggleLockBtn" class="btn btn-lock" data-locked="false">
+            <span class="lock-icon">🔓</span>
+            <span class="lock-text">Bật Khóa</span>
+          </button>
+        </div>
+      </section>
+
       <section class="tokens-section">
         <h2>Danh Sách Token</h2>
         <div id="tokensList" class="tokens-list">

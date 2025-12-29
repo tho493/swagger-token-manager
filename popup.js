@@ -4,9 +4,14 @@ const tokenNameInput = document.getElementById('tokenName');
 const tokenValueInput = document.getElementById('tokenValue');
 const tokensList = document.getElementById('tokensList');
 const notification = document.getElementById('notification');
+const toggleLockBtn = document.getElementById('toggleLockBtn');
+const lockStatus = document.getElementById('lockStatus');
 
-// Load tokens when popup opens
-document.addEventListener('DOMContentLoaded', loadTokens);
+// Load tokens and lock state when popup opens
+document.addEventListener('DOMContentLoaded', () => {
+    loadTokens();
+    loadLockState();
+});
 
 // Add token form submission
 addTokenForm.addEventListener('submit', async (e) => {
@@ -92,7 +97,7 @@ async function deleteToken(index) {
     tokens.splice(index, 1);
 
     await chrome.storage.local.set({ tokens });
-    showNotification(`🗑️ Token "${deletedToken.name}" đã được xóa!`);
+    showNotification(`Token "${deletedToken.name}" đã được xóa`);
     loadTokens();
 }
 
@@ -156,3 +161,97 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// ===== PARAMETER LOCK FEATURE =====
+
+// Load parameter lock state and update UI
+async function loadLockState() {
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab || !tab.url) {
+            return;
+        }
+
+        const url = new URL(tab.url).origin + new URL(tab.url).pathname;
+        const result = await chrome.storage.local.get(['paramLockState']);
+        const lockState = result.paramLockState || {};
+        const isLocked = lockState[url] || false;
+
+        updateLockUI(isLocked);
+    } catch (error) {
+        console.error('Error loading lock state:', error);
+    }
+}
+
+// Update lock UI based on state
+function updateLockUI(isLocked) {
+    if (!toggleLockBtn || !lockStatus) return;
+
+    toggleLockBtn.dataset.locked = isLocked;
+
+    if (isLocked) {
+        toggleLockBtn.classList.add('locked');
+        toggleLockBtn.querySelector('.lock-icon').textContent = '🔒';
+        toggleLockBtn.querySelector('.lock-text').textContent = 'Tắt Khóa';
+        lockStatus.textContent = 'Đang bật';
+        lockStatus.classList.add('locked');
+    } else {
+        toggleLockBtn.classList.remove('locked');
+        toggleLockBtn.querySelector('.lock-icon').textContent = '🔓';
+        toggleLockBtn.querySelector('.lock-text').textContent = 'Bật Khóa';
+        lockStatus.textContent = 'Đang tắt';
+        lockStatus.classList.remove('locked');
+    }
+}
+
+// Toggle parameter lock
+toggleLockBtn?.addEventListener('click', async () => {
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab || !tab.url) {
+            showNotification('Không tìm thấy tab đang hoạt động!', 'error');
+            return;
+        }
+
+        // Check if URL contains swagger or api-docs
+        if (!tab.url.includes('swagger') && !tab.url.includes('api-docs') && !tab.url.includes('api/docs')) {
+            showNotification('Trang này không phải Swagger UI!', 'error');
+            return;
+        }
+
+        const url = new URL(tab.url).origin + new URL(tab.url).pathname;
+        const result = await chrome.storage.local.get(['paramLockState']);
+        const lockState = result.paramLockState || {};
+        const currentState = lockState[url] || false;
+        const newState = !currentState;
+
+        // Update lock state
+        lockState[url] = newState;
+        await chrome.storage.local.set({ paramLockState: lockState });
+
+        // Update UI
+        updateLockUI(newState);
+
+        // Send message to content script to enable/disable monitoring
+        chrome.tabs.sendMessage(tab.id, {
+            action: 'toggleParamLock',
+            enabled: newState
+        }, (response) => {
+            if (chrome.runtime.lastError) {
+                showNotification('Không thể kết nối với trang. Hãy refresh trang Swagger!', 'error');
+                return;
+            }
+
+            if (newState) {
+                showNotification('Đã bật khóa tham số');
+            } else {
+                showNotification('Đã tắt khóa tham số');
+            }
+        });
+
+    } catch (error) {
+        console.error('Error toggling lock:', error);
+        showNotification('Có lỗi xảy ra!', 'error');
+    }
+});
+
