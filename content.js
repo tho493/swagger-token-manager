@@ -13,12 +13,17 @@ function logoutExistingToken() {
         // Method 1: Clear via Swagger UI API
         if (window.ui && window.ui.authActions) {
             window.ui.authActions.logout(['Bearer']);
+            // Also try other common auth names
+            window.ui.authActions.logout(['bearer']);
+            window.ui.authActions.logout(['api_key']);
             console.log('🔓 Logged out existing token via Swagger UI API');
         }
 
         // Method 2: Clear via SwaggerUIBundle  
         if (window.SwaggerUIBundle && window.SwaggerUIBundle.authActions) {
             window.SwaggerUIBundle.authActions.logout(['Bearer']);
+            window.SwaggerUIBundle.authActions.logout(['bearer']);
+            window.SwaggerUIBundle.authActions.logout(['api_key']);
             console.log('🔓 Logged out existing token via SwaggerUIBundle');
         }
 
@@ -27,11 +32,27 @@ function logoutExistingToken() {
             (key.includes('authorized') ||
                 key.includes('auth') ||
                 key.includes('bearer') ||
-                key.includes('token')) &&
+                key.includes('Bearer') ||
+                key.includes('token') ||
+                key.includes('Token') ||
+                key.includes('swagger_authorized')) &&
             !key.includes('swagger_token_manager_auth')
         );
         authKeys.forEach(key => {
             localStorage.removeItem(key);
+            console.log('🗑️ Removed localStorage key:', key);
+        });
+
+        // Method 4: Clear sessionStorage as well
+        const sessionKeys = Object.keys(sessionStorage).filter(key =>
+            key.includes('authorized') ||
+            key.includes('auth') ||
+            key.includes('bearer') ||
+            key.includes('token')
+        );
+        sessionKeys.forEach(key => {
+            sessionStorage.removeItem(key);
+            console.log('🗑️ Removed sessionStorage key:', key);
         });
 
     } catch (error) {
@@ -234,8 +255,9 @@ window.addEventListener('load', () => {
         try {
             const authData = JSON.parse(savedAuth);
             console.log('🔄 Auto-applying saved token:', authData.tokenName);
+            // Use applyNewToken directly as there's no existing token on fresh page load
             setTimeout(() => {
-                applyTokenToSwagger(authData.token, authData.tokenName);
+                applyNewToken(authData.token, authData.tokenName);
             }, 1500);
         } catch (error) {
             console.error('Error auto-applying token:', error);

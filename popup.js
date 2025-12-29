@@ -41,7 +41,7 @@ async function loadTokens() {
 
     tokensList.innerHTML = tokens.map((token, index) => `
     <div class="token-item" data-index="${index}">
-      <button class="btn btn-delete" data-index="${index}" onclick="deleteToken(${index})">
+      <button class="btn btn-delete" data-index="${index}">
         🗑️ Xóa
       </button>
       <div class="token-name">${escapeHtml(token.name)}</div>
@@ -53,12 +53,21 @@ async function loadTokens() {
     document.querySelectorAll('.token-item').forEach(item => {
         item.addEventListener('click', (e) => {
             // Don't apply token if delete button was clicked
-            if (e.target.classList.contains('btn-delete')) {
+            if (e.target.classList.contains('btn-delete') || e.target.closest('.btn-delete')) {
                 return;
             }
 
             const index = item.dataset.index;
             applyToken(tokens[index]);
+        });
+    });
+
+    // Add click handlers to delete buttons
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const index = parseInt(btn.dataset.index);
+            await deleteToken(index);
         });
     });
 }
@@ -77,9 +86,7 @@ async function getTokens() {
 }
 
 // Delete a token
-window.deleteToken = async function (index) {
-    event.stopPropagation();
-
+async function deleteToken(index) {
     const tokens = await getTokens();
     const deletedToken = tokens[index];
     tokens.splice(index, 1);
@@ -87,7 +94,7 @@ window.deleteToken = async function (index) {
     await chrome.storage.local.set({ tokens });
     showNotification(`🗑️ Token "${deletedToken.name}" đã được xóa!`);
     loadTokens();
-};
+}
 
 // Apply token to current Swagger page
 async function applyToken(token) {
