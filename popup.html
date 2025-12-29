@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swagger Token Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Swagger Token Manager</h1>
+      </header>
+
+      <section class="add-token-section">
+        <h2>Thêm Token Mới</h2>
+        <form id="addTokenForm">
+          <div class="form-group">
+            <label for="tokenName">Tên Token:</label>
+            <input
+              type="text"
+              id="tokenName"
+              placeholder="VD: Dev Token, Production Token"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="tokenValue">Token Value:</label>
+            <textarea
+              id="tokenValue"
+              rows="3"
+              placeholder="Nhập JWT token hoặc API key..."
+              required
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Thêm Token</button>
+        </form>
+      </section>
+
+      <section class="tokens-section">
+        <h2>Danh Sách Token</h2>
+        <div id="tokensList" class="tokens-list">
+          <p class="empty-state">
+            Chưa có token nào. Hãy thêm token mới ở trên.
+          </p>
+        </div>
+      </section>
+
+      <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,92 +1,109 @@
-# swagger-token-manager
+# Swagger Token Manager
 
+Chrome extension để quản lý và chuyển đổi token Swagger nhanh chóng mà không cần logout/login.
 
+## Tính năng
 
-## Getting started
+- ✅ Lưu nhiều token với tên gọi riêng
+- ✅ Chuyển đổi token chỉ với một click
+- ✅ Không cần logout/login lại
+- ✅ Giao diện đẹp, dễ sử dụng
+- ✅ Tự động áp dụng token khi load trang Swagger
+- ✅ Lưu trữ token an toàn trong Chrome Storage
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Hướng dẫn cài đặt
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### Cài đặt Extension (Chế độ Developer)
 
-## Add your files
+1. Mở Chrome và truy cập `chrome://extensions/`
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+2. Bật chế độ **Developer mode** (góc trên bên phải)
+
+3. Click nút **"Load unpacked"** (Tải tiện ích đã giải nén)
+
+4. Chọn thư mục `e:\swagger-token-manager`
+
+5. Extension sẽ được cài đặt và hiển thị icon trên thanh công cụ
+
+## Hướng dẫn sử dụng
+
+### Thêm Token Mới
+
+1. Click vào icon **Swagger Token Manager** trên thanh công cụ Chrome
+
+2. Nhập **Tên Token** (ví dụ: Dev Token, Production Token, Testing Token)
+
+3. Nhập **Token Value** (JWT token hoặc API key)
+
+4. Click nút **"➕ Thêm Token"**
+
+5. Token sẽ được lưu vào danh sách
+
+### Sử dụng Token
+
+1. Truy cập trang Swagger UI (URL chứa `swagger`, `api-docs`, hoặc `api/docs`)
+
+2. Click vào icon **Swagger Token Manager**
+
+3. Click vào token bạn muốn sử dụng trong danh sách
+
+4. Token sẽ tự động được áp dụng vào Swagger UI
+
+5. Bạn có thể test API ngay lập tức mà không cần logout/login
+
+### Xóa Token
+
+1. Click vào icon **Swagger Token Manager**
+
+2. Click nút **"🗑️ Xóa"** bên cạnh token muốn xóa
+
+3. Token sẽ bị xóa khỏi danh sách
+
+## Cấu trúc thư mục
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.tho493.id.vn/tho493/swagger-token-manager.git
-git branch -M main
-git push -uf origin main
+swagger-token-manager/
+├── manifest.json          # Cấu hình extension
+├── popup.html            # Giao diện popup
+├── popup.js              # Logic popup
+├── content.js            # Script injection vào Swagger UI
+├── styles.css            # CSS styling
+├── icons/                # Icons cho extension
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
+└── README.md             # File này
 ```
 
-## Integrate with your tools
+## Cách hoạt động
 
-- [ ] [Set up project integrations](https://gitlab.tho493.id.vn/tho493/swagger-token-manager/-/settings/integrations)
+Extension sử dụng nhiều phương pháp để inject token vào Swagger UI:
 
-## Collaborate with your team
+1. **Swagger UI API**: Sử dụng `window.ui.authActions.authorize()` nếu có
+2. **UI Automation**: Tự động click nút Authorize và điền token
+3. **LocalStorage**: Lưu token để tự động áp dụng khi reload trang
+4. **Message Passing**: Popup giao tiếp với content script qua Chrome messaging API
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Lưu ý
 
-## Test and Deploy
+- Extension chỉ hoạt động trên các trang có Swagger UI
+- Token được lưu trữ an toàn trong Chrome Storage (local)
+- Token sẽ tự động áp dụng lại khi bạn reload trang Swagger
+- Extension tương thích với Swagger UI 2.x và 3.x
 
-Use the built-in continuous integration in GitLab.
+## Troubleshooting
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Token không được áp dụng?
 
-***
+- Đảm bảo bạn đang ở trang Swagger UI
+- Thử refresh lại trang Swagger
+- Kiểm tra Console (F12) để xem log
 
-# Editing this README
+### Extension không hiển thị?
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+- Kiểm tra xem extension đã được bật trong `chrome://extensions/`
+- Thử reload lại extension
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+MIT License - Sử dụng tự do cho mục đích cá nhân và thương mại.
