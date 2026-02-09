@@ -106,4 +106,4 @@ Extension sử dụng nhiều phương pháp để inject token vào Swagger UI:
 
 ## License
 
-MIT License - Sử dụng tự do cho mục đích cá nhân và thương mại.
+MIT License - Sử dụng tự do cho mục đích cá nhân và phi thương mại.
