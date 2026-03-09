@@ -34,13 +34,66 @@ section {
   padding: 20px;
 }
 
+/* Tabs Styling */
+.tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  outline: none;
+}
+
+.tab-btn:hover {
+  color: #49cc90;
+  background: #f0f9f5;
+}
+
+.tab-btn.active {
+  color: #49cc90;
+  border-bottom-color: #49cc90;
+  background: white;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .add-token-section {
-  border-bottom: 2px solid #f0f0f0;
+  padding: 20px;
 }
 
 .param-lock-section {
-  border-bottom: 2px solid #f0f0f0;
-  padding: 20px;
+  border-top: 1px solid #f0f0f0;
+  padding: 15px 20px;
+  background: #fafafa;
 }
 
 .param-lock-container {

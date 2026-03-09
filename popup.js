@@ -7,8 +7,29 @@ const notification = document.getElementById('notification');
 const toggleLockBtn = document.getElementById('toggleLockBtn');
 const lockStatus = document.getElementById('lockStatus');
 
+// Tab Elements
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+// Initialize Tabs
+function initTabs() {
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding content
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+    });
+}
+
 // Load tokens and lock state when popup opens
 document.addEventListener('DOMContentLoaded', () => {
+    initTabs();
     loadTokens();
     loadLockState();
 });
@@ -33,6 +54,9 @@ addTokenForm.addEventListener('submit', async (e) => {
 
     showNotification('Token đã được lưu thành công!');
     loadTokens();
+    
+    // Switch to select token tab after successful addition
+    document.querySelector('.tab-btn[data-tab="select-token"]').click();
 });
 
 // Load and display all tokens
@@ -47,7 +71,7 @@ async function loadTokens() {
     tokensList.innerHTML = tokens.map((token, index) => `
     <div class="token-item" data-index="${index}">
       <button class="btn btn-delete" data-index="${index}">
-        🗑️ Xóa
+        Xóa
       </button>
       <div class="token-name">${escapeHtml(token.name)}</div>
       <div class="token-value">${escapeHtml(token.value.substring(0, 50))}${token.value.length > 50 ? '...' : ''}</div>

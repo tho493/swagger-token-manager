@@ -149,6 +149,8 @@ function logoutExistingToken() {
 function applyTokenToSwagger(token, tokenName) {
     try {
         console.log(`Applying token: ${tokenName}`);
+        
+        updateActiveTokenBadge(null); // Clear current badge temporarily
 
         // First, logout existing token
         logoutExistingToken();
@@ -184,6 +186,7 @@ function applyNewToken(token, tokenName) {
 
             console.log(`Token "${tokenName}" applied successfully via Swagger UI API`);
             showSuccessMessage(`Token "${tokenName}" đã được áp dụng`);
+            updateActiveTokenBadge(tokenName);
 
             // Save to localStorage for persistence
             localStorage.setItem('swagger_token_manager_auth', JSON.stringify({
@@ -206,6 +209,7 @@ function applyNewToken(token, tokenName) {
 
                 console.log(`Token "${tokenName}" applied successfully via SwaggerUIBundle`);
                 showSuccessMessage(`Token "${tokenName}" đã được áp dụng`);
+                updateActiveTokenBadge(tokenName);
 
                 // Save to localStorage for persistence
                 localStorage.setItem('swagger_token_manager_auth', JSON.stringify({
@@ -259,6 +263,7 @@ function applyNewToken(token, tokenName) {
                                     authModalBtn.click();
                                     console.log(`Token "${tokenName}" applied via UI interaction`);
                                     showSuccessMessage(`Token "${tokenName}" đã được áp dụng`);
+                                    updateActiveTokenBadge(tokenName);
 
                                     // Close modal
                                     setTimeout(() => {
@@ -274,6 +279,7 @@ function applyNewToken(token, tokenName) {
             } else {
                 console.log('Authorize button not found, token saved to localStorage');
                 showSuccessMessage(`Token "${tokenName}" đã được áp dụng`);
+                updateActiveTokenBadge(tokenName);
             }
         }, 100);
 
@@ -335,6 +341,45 @@ function showSuccessMessage(message) {
     }, 3000);
 }
 
+// Show a persistent badge with the active token name
+function updateActiveTokenBadge(tokenName) {
+    let badge = document.getElementById('swagger-active-token-badge');
+    
+    if (!tokenName) {
+        if (badge) badge.remove();
+        return;
+    }
+    
+    if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'swagger-active-token-badge';
+        badge.title = 'Token đang được áp dụng';
+        badge.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #49cc90;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999998;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: default;
+        `;
+        document.body.appendChild(badge);
+    }
+    badge.innerHTML = `
+        <span style="font-size: 14px;">🔑</span>
+        <span>${tokenName}</span>
+    `;
+}
+
 // Wait for Swagger UI to be fully ready - specifically wait for Authorize button
 function waitForSwaggerReady(callback, maxWaitTime = 15000) {
     const startTime = Date.now();
@@ -372,6 +417,9 @@ window.addEventListener('load', () => {
             const authData = JSON.parse(savedAuth);
             console.log('Waiting for Swagger docs to load (Authorize button)...');
             console.log('Token to apply:', authData.tokenName);
+
+            // Immediately show badge on page load if we have a saved token
+            updateActiveTokenBadge(authData.tokenName);
 
             // Wait for Swagger UI to be ready (Authorize button appears)
             waitForSwaggerReady(() => {

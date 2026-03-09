@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
@@ -12,58 +12,68 @@
         <h1>Swagger Token Manager</h1>
       </header>
 
-      <section class="add-token-section">
-        <h2>Thêm Token Mới</h2>
-        <form id="addTokenForm">
-          <div class="form-group">
-            <label for="tokenName">Tên Token:</label>
-            <input
-              type="text"
-              id="tokenName"
-              placeholder="VD: Dev Token, Production Token"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label for="tokenValue">Token Value:</label>
-            <textarea
-              id="tokenValue"
-              rows="3"
-              placeholder="Nhập JWT token hoặc API key..."
-              required
-            ></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">Thêm Token</button>
-        </form>
-      </section>
+      <!-- Navigation Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="select-token">
+          Chọn Token
+        </button>
+        <button class="tab-btn" data-tab="add-token">Thêm Token</button>
+      </div>
 
-      <section class="param-lock-section">
-        <h2>🔒 Khóa Tham Số</h2>
-        <div class="param-lock-container">
-          <div class="param-lock-info">
-            <p class="param-lock-description">
-              Tự động lưu và khôi phục tham số khi reload trang
-            </p>
-            <p class="param-lock-status">
-              Trạng thái:
-              <span id="lockStatus" class="status-text">Đang tắt</span>
-            </p>
+      <!-- Tab Content: Select Token (Default) -->
+      <div id="select-token-tab" class="tab-content active">
+        <section class="tokens-section">
+          <div id="tokensList" class="tokens-list">
+            <p class="empty-state">Chưa có token nào. Hãy thêm token mới.</p>
           </div>
-          <button id="toggleLockBtn" class="btn btn-lock" data-locked="false">
-            <span class="lock-icon">🔓</span>
-            <span class="lock-text">Bật Khóa</span>
-          </button>
-        </div>
-      </section>
+        </section>
 
-      <section class="tokens-section">
-        <h2>Danh Sách Token</h2>
-        <div id="tokensList" class="tokens-list">
-          <p class="empty-state">
-            Chưa có token nào. Hãy thêm token mới ở trên.
-          </p>
-        </div>
-      </section>
+        <section class="param-lock-section">
+          <h2>Khóa Tham Số</h2>
+          <div class="param-lock-container">
+            <div class="param-lock-info">
+              <p class="param-lock-description">
+                Tự động lưu và khôi phục tham số khi reload trang
+              </p>
+              <p class="param-lock-status">
+                Trạng thái:
+                <span id="lockStatus" class="status-text">Đang tắt</span>
+              </p>
+            </div>
+            <button id="toggleLockBtn" class="btn btn-lock" data-locked="false">
+              <span class="lock-icon">🔓</span>
+              <span class="lock-text">Bật Khóa</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Tab Content: Add Token -->
+      <div id="add-token-tab" class="tab-content">
+        <section class="add-token-section">
+          <form id="addTokenForm">
+            <div class="form-group">
+              <label for="tokenName">Tên Token:</label>
+              <input
+                type="text"
+                id="tokenName"
+                placeholder="VD: Dev Token, Production Token"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="tokenValue">Token Value:</label>
+              <textarea
+                id="tokenValue"
+                rows="3"
+                placeholder="Nhập JWT token hoặc API key..."
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Thêm Token</button>
+          </form>
+        </section>
+      </div>
 
       <div id="notification" class="notification"></div>
     </div>
